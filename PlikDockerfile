@@ -1,0 +1,35 @@
+# Etap 1: Obraz bazowy z Pythonem (lekka wersja slim dla mniejszego rozmiaru)
+FROM python:3.10-slim AS base
+
+# OCI metadata - informacje o obrazie i autorze (zgodne ze standardem OCI)
+LABEL org.opencontainers.image.title="Aplikacja pogodowa Flask"
+LABEL org.opencontainers.image.description="Serwer Flask pokazujący prognozę pogody dla wybranego miasta"
+LABEL org.opencontainers.image.version="1.0"
+LABEL org.opencontainers.image.authors="Joanna Jurkowska"
+
+# Ustawiamy katalog roboczy wewnątrz kontenera
+WORKDIR /aplikacja
+
+# Kopiujemy tylko plik wymagania.txt – optymalizacja cache
+COPY wymagania.txt .
+
+# Instalujemy zależności – tylko raz, przy zmianie wymagania.txt
+RUN pip install --no-cache-dir -r wymagania.txt
+
+# Kopiujemy resztę kodu aplikacji – zmiany w kodzie nie psują warstwy pip
+COPY . .
+
+# Otwieramy port aplikacji (zdefiniowany w kodzie jako 8080)
+EXPOSE 8080
+
+# Zmienna środowiskowa PORT – do użycia w serwerze
+ENV PORT=8080
+
+# Healthcheck: sprawdza, czy aplikacja działa pod localhost:8080
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget -q --spider http://localhost:8080 || exit 1
+
+# Domyślna komenda startowa – uruchamia serwer aplikacji
+CMD ["python", "serwer.py"]
+
+

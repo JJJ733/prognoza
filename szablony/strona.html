@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Prognoza pogody</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>🌦️ Prognoza pogody</h1>
+    
+    <h2>Wybierz lokalizację</h2>
+    <form method="post">
+        <label for="kraj">Kraj:</label>
+        <select name="kraj" id="kraj" onchange="aktualizujMiasta()" required>
+            <option value="" disabled selected>-- wybierz kraj --</option>
+            {% for kraj in miasta %}
+                <option value="{{ kraj }}">{{ kraj }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="miasto">Miasto:</label>
+        <select name="miasto" id="miasto" required>
+            <option value="" disabled selected>-- wybierz miasto --</option>
+        </select>
+
+        <input type="submit" value="Pokaż pogodę">
+    </form>
+
+    {% if pogoda %}
+    <div class="pogoda">
+        <h2>🌍 Pogoda dla {{ pogoda.miasto }}</h2>
+        <ul>
+            <li>🌡️ Temperatura: {{ pogoda.temperatura }}°C</li>
+            <li>💧 Wilgotność: {{ pogoda.wilgotnosc }}%</li>
+            <li>🔽 Ciśnienie: {{ pogoda.cisnienie }} hPa</li>
+            <li>📝 Opis: {{ pogoda.opis }}</li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    const miastaDlaKraju = {{ miasta | tojson }};
+
+    function aktualizujMiasta() {
+        const kraj = document.getElementById('kraj').value;
+        const selectMiasto = document.getElementById('miasto');
+        selectMiasto.innerHTML = "";
+
+        // Dodaj opcję domyślną
+        const opcjaDomyslna = document.createElement("option");
+        opcjaDomyslna.value = "";
+        opcjaDomyslna.text = "-- wybierz miasto --";
+        opcjaDomyslna.disabled = true;
+        opcjaDomyslna.selected = true;
+        selectMiasto.add(opcjaDomyslna);
+
+        // Dodaj miasta
+        miastaDlaKraju[kraj].forEach(miasto => {
+            const opcja = document.createElement("option");
+            opcja.text = miasto;
+            opcja.value = miasto;
+            selectMiasto.add(opcja);
+        });
+    }
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
